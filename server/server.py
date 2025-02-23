@@ -4,9 +4,6 @@ from models.forecast import Forecast
 
 import python_weather
 
-import asyncio
-import os
-
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 

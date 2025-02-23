@@ -1,0 +1,54 @@
+.weather-app {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+  background-color: #e0f7fa; /* Light blue background */
+}
+
+header {
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 2.5em;
+  color: #0277bd; /* Dark blue color */
+}
+
+h2 {
+  font-size: 1.5em;
+  color: #0288d1; /* Medium blue color */
+}
+
+.locations {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.location-tile {
+  background-color: #81d4fa; /* Light blue color */
+  border: 1px solid #0288d1; /* Medium blue border */
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.location-tile:hover {
+  background-color: #4fc3f7; /* Slightly darker blue on hover */
+}
+
+.weather-info {
+  margin-top: 20px;
+}
+
+.weather-info h3 {
+  font-size: 1.2em;
+  color: #0277bd; /* Dark blue color */
+}
+
+.weather-info p {
+  font-size: 1em;
+  color: #0288d1; /* Medium blue color */
+}
