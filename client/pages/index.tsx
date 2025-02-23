@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Forecast } from "../models/forecast";
+import { Forecast, DailyForecast } from "../models/forecast";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import Image from "next/image";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 
 type Location = {
   name: string;
@@ -7,9 +11,18 @@ type Location = {
   longitude: number;
 };
 
+const mapContainerStyle = {
+  width: "100%",
+  height: "400px",
+};
+
 function WeatherApp() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [weather, setWeather] = useState<Forecast | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
+    null
+  );
 
   useEffect(() => {
     fetch("http://127.0.0.1:8080/api/get-locations")
@@ -18,11 +31,25 @@ function WeatherApp() {
   }, []);
 
   const handleLocationClick = (location: Location) => {
+    setLoading(true);
+    setSelectedLocation(location);
     fetch(
       `http://127.0.0.1:8080/api/get-weather?latitude=${location.latitude}&longitude=${location.longitude}`
     )
       .then((res) => res.json())
-      .then((data) => setWeather(data));
+      .then((data) => {
+        setWeather(data);
+        setLoading(false);
+      });
+  };
+
+  const handleClearClick = () => {
+    setWeather(null);
+    setSelectedLocation(null);
+  };
+
+  const getDayName = (date: Date) => {
+    return new Date(date).toLocaleDateString("en-AU", { weekday: "long" });
   };
 
   return (
@@ -43,17 +70,94 @@ function WeatherApp() {
         ))}
       </div>
       <div className="weather-info">
-        <h3>Weather Information</h3>
-        {weather ? (
-          <div>
-            <p>Temperature: {weather.temperature}</p>
-            <p>Description: {weather.description}</p>
-            <p>Feels Like: {weather.feels_like}</p>
-            <p>Humidity: {weather.humidity}</p>
-            <p>Wind Speed: {weather.wind_speed}</p>
+        {loading ? (
+          <div className="weather-details">
+            <Skeleton height={30} width={200} style={{ marginBottom: 10 }} />
+            <Skeleton height={30} width={300} style={{ marginBottom: 10 }} />
+            <Skeleton height={30} width={250} style={{ marginBottom: 10 }} />
+            <Skeleton height={30} width={150} style={{ marginBottom: 10 }} />
+            <Skeleton height={30} width={180} style={{ marginBottom: 10 }} />
           </div>
+        ) : weather ? (
+          <>
+            <div className="weather-details">
+              <h3>
+                Forecast for {getDayName(weather.datetime)} (
+                {new Date(weather.datetime).toLocaleDateString()})
+              </h3>
+              <p className="current-temp">
+                Current Temperature: {weather.temperature}°C
+              </p>
+              <p className="description">{weather.description}</p>
+              <p>Feels Like: {weather.feels_like}°C</p>
+              <p>Humidity: {weather.humidity}%</p>
+              <p>Wind Speed: {weather.wind_speed} km/h</p>
+              <p>UV Index: {weather.ultraviolet}</p>
+              <p>Precipitation: {weather.precipitation} mm</p>
+              <p>
+                Chance of Rain:{" "}
+                {weather.daily_forecasts[0].hourly_forecasts[0].chances_of_rain}
+                %
+              </p>
+              <p className="min-temp">
+                Min Temp: {weather.daily_forecasts[0].lowest_temperature}°C
+              </p>
+              <p className="max-temp">
+                Max Temp: {weather.daily_forecasts[0].highest_temperature}°C
+              </p>
+              <button className="clear-button" onClick={handleClearClick}>
+                Clear
+              </button>
+              <div className="week-overview">
+                {weather.daily_forecasts.map(
+                  (dailyForecast: DailyForecast, index: number) => (
+                    <div key={index} className="day-forecast">
+                      <p>{getDayName(dailyForecast.date)}</p>
+                      <Image
+                        src={`/path/to/weather/icons/${dailyForecast.hourly_forecasts[0].kind}.png`}
+                        alt={dailyForecast.hourly_forecasts[0].description}
+                        width={50}
+                        height={50}
+                      />
+                      <p>{dailyForecast.highest_temperature}°C</p>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+            {selectedLocation && (
+              <div className="map-container">
+                <LoadScript
+                  googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY!}
+                >
+                  <GoogleMap
+                    mapContainerStyle={mapContainerStyle}
+                    center={{
+                      lat: selectedLocation.latitude,
+                      lng: selectedLocation.longitude,
+                    }}
+                    zoom={13}
+                    options={{
+                      disableDefaultUI: true,
+                      draggable: false,
+                      zoomControl: false,
+                      scrollwheel: false,
+                      disableDoubleClickZoom: true,
+                    }}
+                  >
+                    <Marker
+                      position={{
+                        lat: selectedLocation.latitude,
+                        lng: selectedLocation.longitude,
+                      }}
+                    />
+                  </GoogleMap>
+                </LoadScript>
+              </div>
+            )}
+          </>
         ) : (
-          <p>Loading...</p>
+          <p>Select a location to see the weather information.</p>
         )}
       </div>
     </div>
