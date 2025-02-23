@@ -3,7 +3,8 @@ import { Forecast, DailyForecast } from "../models/forecast";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import Image from "next/image";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import { kindToImageMap, getDayName } from "@/utils/utils";
 
 type Location = {
   name: string;
@@ -23,6 +24,10 @@ function WeatherApp() {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     null
   );
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY!,
+  });
 
   useEffect(() => {
     fetch("http://127.0.0.1:8080/api/get-locations")
@@ -48,9 +53,9 @@ function WeatherApp() {
     setSelectedLocation(null);
   };
 
-  const getDayName = (date: Date) => {
-    return new Date(date).toLocaleDateString("en-AU", { weekday: "long" });
-  };
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="weather-app">
@@ -114,7 +119,9 @@ function WeatherApp() {
                     <div key={index} className="day-forecast">
                       <p>{getDayName(dailyForecast.date)}</p>
                       <Image
-                        src={`/path/to/weather/icons/${dailyForecast.hourly_forecasts[0].kind}.png`}
+                        src={
+                          kindToImageMap[dailyForecast.hourly_forecasts[0].kind]
+                        }
                         alt={dailyForecast.hourly_forecasts[0].description}
                         width={50}
                         height={50}
@@ -127,32 +134,28 @@ function WeatherApp() {
             </div>
             {selectedLocation && (
               <div className="map-container">
-                <LoadScript
-                  googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY!}
+                <GoogleMap
+                  mapContainerStyle={mapContainerStyle}
+                  center={{
+                    lat: selectedLocation.latitude,
+                    lng: selectedLocation.longitude,
+                  }}
+                  zoom={13}
+                  options={{
+                    disableDefaultUI: true,
+                    draggable: false,
+                    zoomControl: false,
+                    scrollwheel: false,
+                    disableDoubleClickZoom: true,
+                  }}
                 >
-                  <GoogleMap
-                    mapContainerStyle={mapContainerStyle}
-                    center={{
+                  <Marker
+                    position={{
                       lat: selectedLocation.latitude,
                       lng: selectedLocation.longitude,
                     }}
-                    zoom={13}
-                    options={{
-                      disableDefaultUI: true,
-                      draggable: false,
-                      zoomControl: false,
-                      scrollwheel: false,
-                      disableDoubleClickZoom: true,
-                    }}
-                  >
-                    <Marker
-                      position={{
-                        lat: selectedLocation.latitude,
-                        lng: selectedLocation.longitude,
-                      }}
-                    />
-                  </GoogleMap>
-                </LoadScript>
+                  />
+                </GoogleMap>
               </div>
             )}
           </>
