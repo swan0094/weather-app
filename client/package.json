@@ -10,7 +10,7 @@
     "lint": "next lint",
     "export": "next export",
     "predeploy": "npm run build && npm run export",
-    "deploy": "gh-pages -d out"
+    "deploy": "gh-pages -d client/out"
   },
   "dependencies": {
     "@react-google-maps/api": "^2.20.6",
