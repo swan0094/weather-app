@@ -1,71 +1,88 @@
 from dataclasses import dataclass
-from typing import Tuple, List, Optional
-from datetime import datetime, date, time
-from python_weather.enums import Kind, UltraViolet, WindDirection, Phase, HeatIndex
+from typing import List, Optional
+from datetime import datetime
 
 @dataclass
-class HourlyForecast:
-    chances_of_fog: int
-    chances_of_frost: int
-    chances_of_high_temperature: int
-    chances_of_overcast: int
-    chances_of_rain: int
-    chances_of_remaining_dry: int
-    chances_of_snow: int
-    chances_of_sunshine: int
-    chances_of_thunder: int
-    chances_of_windy: int
-    cloud_cover: int
-    description: str
-    dew_point: int
-    feels_like: int
-    heat_index: HeatIndex
-    humidity: int
-    kind: Kind
-    precipitation: float
-    pressure: float
-    temperature: int
-    time: time
-    ultraviolet: UltraViolet
-    visibility: int
-    wind_chill: int
-    wind_direction: WindDirection
-    wind_gust: int
-    wind_speed: int
+class Coord:
+    lat: float  # Geo location, latitude
+    lon: float  # Geo location, longitude
+
+@dataclass
+class Weather:
+    id: int  # Weather condition id
+    main: str  # Group of weather parameters (Rain, Snow, Clouds etc.)
+    description: str  # Weather condition within the group
+    icon: str  # Weather icon id
+
+@dataclass
+class Temp:
+    min: float  # Min daily temperature
+    max: float  # Max daily temperature
 
 @dataclass
 class DailyForecast:
-    date: date
-    highest_temperature: int
-    hourly_forecasts: List[HourlyForecast]
-    lowest_temperature: int
-    moon_illumination: int
-    moon_phase: Phase
-    moonrise: Optional[time]
-    moonset: Optional[time]
-    snowfall: float
-    sunlight: float
-    sunrise: Optional[time]
-    sunset: Optional[time]
-    temperature: int
+    dt: datetime  # Time of data forecasted
+    sunrise: int  # Sunrise time
+    sunset: int  # Sunset time
+    temp: Temp
+    humidity: int  # Humidity, %
+    weather: List[Weather]
+    speed: float  # Maximum wind speed for the day
+    deg: int  # Wind direction relevant to the maximum wind speed, degrees (meteorological)
+    clouds: int  # Cloudiness, %
+    rain: Optional[float]  # Precipitation volume, mm
+    snow: Optional[float]  # Snow volume, mm
+    pop: float  # Probability of precipitation
+
+@dataclass
+class City:
+    name: str  # City name
+    coord: Coord
+    country: str  # Country code (GB, JP etc.)
 
 @dataclass
 class Forecast:
-    coordinates: Tuple[float, float]
-    country: str
-    daily_forecasts: List[DailyForecast]
-    datetime: datetime
-    description: str
-    feels_like: int
-    humidity: int
-    kind: Kind
-    local_population: int
-    location: str
-    precipitation: float
-    pressure: float
-    region: str
-    temperature: int
-    ultraviolet: UltraViolet
-    visibility: int
-    wind_direction: WindDirection
-    wind_speed: int
+    daily_forecasts: List[DailyForecast]  # List of daily forecasts
+    city: City
+
+@dataclass
+class Main:
+    temp: float  # Temperature
+    feels_like: float  # Feels like temperature
+    temp_min: float  # Minimum temperature at the moment
+    temp_max: float  # Maximum temperature at the moment
+    pressure: int  # Atmospheric pressure on the sea level, hPa
+    humidity: int  # Humidity, %
+    sea_level: Optional[int]  # Atmospheric pressure on the sea level, hPa
+    grnd_level: Optional[int]  # Atmospheric pressure on the ground level, hPa
+
+@dataclass
+class Wind:
+    speed: float  # Wind speed
+    deg: int  # Wind direction, degrees (meteorological)
+    gust: Optional[float]  # Wind gust
+
+@dataclass
+class Clouds:
+    all: int  # Cloudiness, %
+
+@dataclass
+class Rain:
+    one_h: Optional[float]  # Precipitation, mm/h
+
+@dataclass
+class Snow:
+    one_h: Optional[float]  # Precipitation, mm/h
+
+@dataclass
+class CurrentWeather:
+    coord: Coord
+    weather: List[Weather]
+    main: Main
+    visibility: int  # Visibility, meter
+    wind: Wind
+    clouds: Clouds
+    rain: Optional[Rain]
+    dt: int  # Time of data calculation, unix, UTC
+    timezone: int  # Shift in seconds from UTC
+    name: str  # City name

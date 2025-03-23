@@ -1,49 +1,83 @@
-from models.forecast import DailyForecast, HourlyForecast
+from datetime import datetime
+from models.forecast import DailyForecast, Weather, CurrentWeather, Main, Wind, Clouds, Rain, Snow, Coord
 
 def serialize_daily_forecast(daily_forecast: DailyForecast) -> dict:
     return {
-        "date": daily_forecast.date.isoformat(),
-        "highest_temperature": daily_forecast.highest_temperature,
-        "hourly_forecasts": [serialize_hourly_forecast(hf) for hf in daily_forecast.hourly_forecasts],
-        "lowest_temperature": daily_forecast.lowest_temperature,
-        "moon_illumination": daily_forecast.moon_illumination,
-        "moon_phase": daily_forecast.moon_phase.name,
-        "moonrise": daily_forecast.moonrise.isoformat() if daily_forecast.moonrise else None,
-        "moonset": daily_forecast.moonset.isoformat() if daily_forecast.moonset else None,
-        "snowfall": daily_forecast.snowfall,
-        "sunlight": daily_forecast.sunlight,
-        "sunrise": daily_forecast.sunrise.isoformat() if daily_forecast.sunrise else None,
-        "sunset": daily_forecast.sunset.isoformat() if daily_forecast.sunset else None,
-        "temperature": daily_forecast.temperature
+        "dt": datetime.fromtimestamp(daily_forecast["dt"]).strftime('%Y-%m-%d'),  # Convert Unix timestamp to date string
+        "sunrise": daily_forecast["sunrise"],
+        "sunset": daily_forecast["sunset"],
+        "temp": {
+            "min": daily_forecast["temp"]["min"],
+            "max": daily_forecast["temp"]["max"]
+        },
+        "humidity": daily_forecast["humidity"],
+        "weather": [serialize_weather(w) for w in daily_forecast["weather"]],
+        "speed": daily_forecast["speed"],
+        "deg": daily_forecast["deg"],
+        "clouds": daily_forecast["clouds"],
+        "rain": daily_forecast.get("rain", 0),
+        "snow": daily_forecast.get("snow", 0),
+        "pop": daily_forecast["pop"]
     }
 
-def serialize_hourly_forecast(hourly_forecast: HourlyForecast) -> dict:
+def serialize_weather(weather: Weather) -> dict:
     return {
-        "chances_of_fog": hourly_forecast.chances_of_fog,
-        "chances_of_frost": hourly_forecast.chances_of_frost,
-        "chances_of_high_temperature": hourly_forecast.chances_of_high_temperature,
-        "chances_of_overcast": hourly_forecast.chances_of_overcast,
-        "chances_of_rain": hourly_forecast.chances_of_rain,
-        "chances_of_remaining_dry": hourly_forecast.chances_of_remaining_dry,
-        "chances_of_snow": hourly_forecast.chances_of_snow,
-        "chances_of_sunshine": hourly_forecast.chances_of_sunshine,
-        "chances_of_thunder": hourly_forecast.chances_of_thunder,
-        "chances_of_windy": hourly_forecast.chances_of_windy,
-        "cloud_cover": hourly_forecast.cloud_cover,
-        "description": hourly_forecast.description,
-        "dew_point": hourly_forecast.dew_point,
-        "feels_like": hourly_forecast.feels_like,
-        "heat_index": hourly_forecast.heat_index.name,
-        "humidity": hourly_forecast.humidity,
-        "kind": hourly_forecast.kind.name,
-        "precipitation": hourly_forecast.precipitation,
-        "pressure": hourly_forecast.pressure,
-        "temperature": hourly_forecast.temperature,
-        "time": hourly_forecast.time.isoformat(),
-        "ultraviolet": hourly_forecast.ultraviolet.name,
-        "visibility": hourly_forecast.visibility,
-        "wind_chill": hourly_forecast.wind_chill,
-        "wind_direction": hourly_forecast.wind_direction.name,
-        "wind_gust": hourly_forecast.wind_gust,
-        "wind_speed": hourly_forecast.wind_speed
+        "id": weather["id"],
+        "main": weather["main"],
+        "description": weather["description"],
+        "icon": weather["icon"]
+    }
+
+def serialize_current_weather(current_weather: CurrentWeather) -> dict:
+    return {
+        "weather": [serialize_weather(w) for w in current_weather["weather"]],
+        "base": current_weather["base"],
+        "main": serialize_main(current_weather["main"]),
+        "visibility": current_weather["visibility"],
+        "wind": serialize_wind(current_weather["wind"]),
+        "clouds": serialize_clouds(current_weather["clouds"]),
+        "rain": serialize_rain(current_weather.get("rain", {})),
+        "snow": serialize_snow(current_weather.get("snow", {})),
+        "dt": datetime.fromtimestamp(current_weather["dt"]).strftime('%Y-%m-%d'),  # Convert Unix timestamp to date string
+        "name": current_weather["name"],
+    }
+
+def serialize_coord(coord: Coord) -> dict:
+    return {
+        "lat": coord["lat"],
+        "lon": coord["lon"]
+    }
+
+def serialize_main(main: Main) -> dict:
+    return {
+        "temp": main["temp"],
+        "feels_like": main["feels_like"],
+        "temp_min": main["temp_min"],
+        "temp_max": main["temp_max"],
+        "pressure": main["pressure"],
+        "humidity": main["humidity"],
+        "sea_level": main.get("sea_level"),
+        "grnd_level": main.get("grnd_level")
+    }
+
+def serialize_wind(wind: Wind) -> dict:
+    return {
+        "speed": wind["speed"],
+        "deg": wind["deg"],
+        "gust": wind.get("gust")
+    }
+
+def serialize_clouds(clouds: Clouds) -> dict:
+    return {
+        "all": clouds["all"]
+    }
+
+def serialize_rain(rain: Rain) -> dict:
+    return {
+        "one_h": rain.get("1h", 0)
+    }
+
+def serialize_snow(snow: Snow) -> dict:
+    return {
+        "one_h": snow.get("1h", 0)
     }

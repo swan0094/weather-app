@@ -16,11 +16,18 @@
   --max-temp-color: #d32f2f;
 }
 
-.weather-app {
+body {
+  margin: 0;
   font-family: var(--font-family);
-  text-align: center;
-  padding: 20px;
   background-color: var(--background-color);
+}
+
+.weather-app {
+  text-align: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
 }
 
 header {
@@ -42,6 +49,8 @@ h2 {
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
+  margin-bottom: 20px;
+  max-width: 800px;
 }
 
 .location-tile {
@@ -58,9 +67,9 @@ h2 {
 }
 
 .weather-info {
-  margin-top: 20px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
 }
 
 .weather-info h3 {
@@ -74,15 +83,14 @@ h2 {
 }
 
 .weather-details {
-  flex: 1;
-  margin-right: 20px;
+  margin-bottom: 20px;
 }
 
 .map-container {
-  flex: 1;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  overflow: hidden;
+  width: 100%;
+  max-width: 800px;
+  margin-top: 20px;
+  margin-bottom: 100px;
 }
 
 .clear-button {
@@ -90,6 +98,7 @@ h2 {
   color: white;
   border: none;
   padding: var(--padding);
+  margin-bottom: 40px;
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: background-color var(--transition-duration);
@@ -119,18 +128,24 @@ h2 {
 
 .week-overview {
   display: flex;
-  overflow-x: auto;
-  margin-top: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .day-forecast {
   flex: 0 0 auto;
-  margin-right: 10px;
-  padding: 10px;
   background-color: var(--light-blue);
   border: 1px solid var(--medium-blue);
   border-radius: var(--border-radius);
+  padding: 10px;
+  margin-right: 10px;
   text-align: center;
+  min-width: 100px;
+  p {
+    margin: 0;
+    font-weight: 650;
+    font-size: 18px;
+  }
 }
 
 .day-forecast img {

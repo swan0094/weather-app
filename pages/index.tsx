@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Forecast, DailyForecast } from "../models/forecast";
+import { Forecast, DailyForecast, CurrentWeather } from "../models/forecast";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import Image from "next/image";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
-import { kindToImageMap, getDayName } from "@/utils/utils";
+import { getDayName } from "@/utils/utils";
 
 type Location = {
   name: string;
@@ -19,7 +19,10 @@ const mapContainerStyle = {
 
 function WeatherApp() {
   const [locations, setLocations] = useState<Location[]>([]);
-  const [weather, setWeather] = useState<Forecast | null>(null);
+  const [currentWeather, setCurrentWeather] = useState<CurrentWeather | null>(
+    null
+  );
+  const [forecast, setForecast] = useState<Forecast | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     null
@@ -38,18 +41,26 @@ function WeatherApp() {
   const handleLocationClick = (location: Location) => {
     setLoading(true);
     setSelectedLocation(location);
+
     fetch(
-      `http://127.0.0.1:8080/api/get-weather?latitude=${location.latitude}&longitude=${location.longitude}`
+      `http://127.0.0.1:8080/api/get-current-weather?latitude=${location.latitude}&longitude=${location.longitude}`
     )
       .then((res) => res.json())
       .then((data) => {
-        setWeather(data);
+        setCurrentWeather(data);
+      });
+    fetch(
+      `http://127.0.0.1:8080/api/get-forecast?latitude=${location.latitude}&longitude=${location.longitude}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setForecast(data);
         setLoading(false);
       });
   };
-
   const handleClearClick = () => {
-    setWeather(null);
+    setCurrentWeather(null);
+    setForecast(null);
     setSelectedLocation(null);
   };
 
@@ -83,53 +94,57 @@ function WeatherApp() {
             <Skeleton height={30} width={150} style={{ marginBottom: 10 }} />
             <Skeleton height={30} width={180} style={{ marginBottom: 10 }} />
           </div>
-        ) : weather ? (
+        ) : currentWeather ? (
           <>
             <div className="weather-details">
               <h3>
-                Forecast for {getDayName(weather.datetime)} (
-                {new Date(weather.datetime).toLocaleDateString()})
+                Forecast for {getDayName(currentWeather.dt)} (
+                {new Date(currentWeather.dt).toLocaleDateString()})
               </h3>
+              <Image
+                src={`http://openweathermap.org/img/wn/${currentWeather.weather[0].icon}@2x.png`}
+                alt={currentWeather.weather[0].description}
+                width={100}
+                height={100}
+                style={{ margin: 0, padding: 0 }}
+              />
               <p className="current-temp">
-                Current Temperature: {weather.temperature}°C
+                Current Temperature: {currentWeather.main.temp.toFixed(1)}°C
               </p>
-              <p className="description">{weather.description}</p>
-              <p>Feels Like: {weather.feels_like}°C</p>
-              <p>Humidity: {weather.humidity}%</p>
-              <p>Wind Speed: {weather.wind_speed} km/h</p>
-              <p>UV Index: {weather.ultraviolet}</p>
-              <p>Precipitation: {weather.precipitation} mm</p>
+              <p>Feels Like: {currentWeather.main.feels_like.toFixed(1)}°C</p>
+              <p>Humidity: {currentWeather.main.humidity}%</p>
+              <p>Wind Speed: {currentWeather.wind.speed.toFixed(1)} km/h</p>
               <p>
-                Chance of Rain:{" "}
-                {weather.daily_forecasts[0].hourly_forecasts[0].chances_of_rain}
-                %
+                Precipitation: {currentWeather.rain?.one_h?.toFixed(1) || 0} mm
               </p>
               <p className="min-temp">
-                Min Temp: {weather.daily_forecasts[0].lowest_temperature}°C
+                Min Temp: {currentWeather.main.temp_min.toFixed(1)}°C
               </p>
               <p className="max-temp">
-                Max Temp: {weather.daily_forecasts[0].highest_temperature}°C
+                Max Temp: {currentWeather.main.temp_max.toFixed(1)}°C
               </p>
               <button className="clear-button" onClick={handleClearClick}>
                 Clear
               </button>
+
               <div className="week-overview">
-                {weather.daily_forecasts.map(
-                  (dailyForecast: DailyForecast, index: number) => (
-                    <div key={index} className="day-forecast">
-                      <p>{getDayName(dailyForecast.date)}</p>
-                      <Image
-                        src={
-                          kindToImageMap[dailyForecast.hourly_forecasts[0].kind]
-                        }
-                        alt={dailyForecast.hourly_forecasts[0].description}
-                        width={50}
-                        height={50}
-                      />
-                      <p>{dailyForecast.highest_temperature}°C</p>
-                    </div>
-                  )
-                )}
+                {forecast != null &&
+                  forecast.daily_forecasts
+                    // Get the next 5 days forecast and ignore the current day as it has
+                    // already been displayed.
+                    .slice(1, 6)
+                    .map((dailyForecast: DailyForecast, index: number) => (
+                      <div key={index} className="day-forecast">
+                        <p>{getDayName(dailyForecast.dt)}</p>
+                        <Image
+                          src={`http://openweathermap.org/img/wn/${dailyForecast.weather[0].icon}@2x.png`}
+                          alt={dailyForecast.weather[0].description}
+                          width={50}
+                          height={50}
+                        />
+                        <p>{dailyForecast.temp.max.toFixed(1)}°C</p>
+                      </div>
+                    ))}
               </div>
             </div>
             {selectedLocation && (
