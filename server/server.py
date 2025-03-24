@@ -5,6 +5,7 @@ import os
 from cachetools import TTLCache
 from utils import serialize_daily_forecast, serialize_current_weather
 from dotenv import load_dotenv
+from geopy.geocoders import Nominatim
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -13,6 +14,8 @@ cache = TTLCache(maxsize=100, ttl=600)
 
 load_dotenv()
 API_KEY = os.getenv("OPEN_WEATHER_API_KEY")
+
+geolocator = Nominatim(user_agent="weather-app")
 
 @app.route("/api/get-locations", methods=["GET"])
 def get_locations():
@@ -79,6 +82,18 @@ def get_current_weather():
         current_weather = serialize_current_weather(weather_data)
         cache[location] = current_weather
         return jsonify(current_weather)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/get-coordinates", methods=["GET"])
+def get_coordinates():
+    location_name = request.args.get("location")
+    try:
+        location = geolocator.geocode(location_name)
+        if location:
+            return jsonify({"latitude": location.latitude, "longitude": location.longitude})
+        else:
+            return jsonify({"error": "Location not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
