@@ -1,40 +1,142 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Weather App
+
+This is a weather application built with [Next.js](https://nextjs.org), [React](https://reactjs.org), and [Flask](https://flask.palletsprojects.com/). It provides current weather and forecast information for various locations, along with a chatbot feature to interact with the app.
+
+---
+
+## Features
+
+- **Weather Information**: View current weather and a 5-day forecast for selected locations.
+- **Interactive Map**: Displays the selected location on a map.
+- **Chatbot**: Ask the chatbot for weather information or general queries.
+- **Responsive Design**: Optimized for both desktop and mobile devices.
+
+---
+
+## Prerequisites
+
+Before running the project, ensure you have the following installed:
+
+- [Node.js](https://nodejs.org/) (v18 or later)
+- [Python](https://www.python.org/) (v3.9 or later)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
+- [pip](https://pip.pypa.io/en/stable/) (comes with Python)
+- [OpenWeather API Key](https://openweathermap.org/api) (required for weather data)
+- [Google Maps API Key](https://developers.google.com/maps) (required for map integration)
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/swan0094/weather-app
+cd weather-app
+```
+
+### 2. Set Up Environment Variables
+
+Create a `.env` file in the root directory and add the following:
+
+```
+OPEN_WEATHER_API_KEY=your_openweather_api_key
+REACT_APP_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+```
+
+Replace `your_openweather_api_key` and `your_google_maps_api_key` with your actual API keys.
+
+---
+
+### 3. Install Dependencies
+
+#### Frontend (React/Next.js)
+
+```bash
+npm install
+```
+
+#### Backend (Flask)
+
+Navigate to the `server` directory:
+
+```bash
+cd server
+pip install -r requirements.txt
+```
+
+---
+
+### 4. Run the Application
+
+#### Start the Backend Server
+
+From the `server` directory, run:
+
+```bash
+python server.py
+```
+
+The backend server will start on `http://127.0.0.1:8080`.
+
+#### Start the Frontend
+
+Navigate back to the root directory and run:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The frontend will start on `http://localhost:3000`.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+---
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Usage
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+### Viewing Weather Information
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Open the app in your browser at [http://localhost:3000](http://localhost:3000).
+2. Select a location from the list to view its current weather and 5-day forecast.
+3. Use the "Clear" button to reset the weather information.
 
-## Learn More
+### Using the Chatbot
 
-To learn more about Next.js, take a look at the following resources:
+1. Interact with the chatbot at the bottom of the page.
+2. Ask questions like:
+   - "What's the weather in London?"
+   - "Show me the forecast for New York."
+3. The chatbot will respond with the requested weather information.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+.
+├── components/         # React components for the UI
+├── models/             # TypeScript models for weather data
+├── pages/              # Next.js pages
+├── server/             # Flask backend
+├── styles/             # CSS styles
+├── utils/              # Utility functions and chatbot logic
+├── .env                # Environment variables
+├── package.json        # Frontend dependencies and scripts
+├── requirements.txt    # Backend dependencies
+└── tsconfig.json       # TypeScript configuration
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+## Troubleshooting
+
+- **Missing API Keys**: Ensure your `.env` file contains valid API keys.
+- **CORS Issues**: If the frontend cannot communicate with the backend, check the CORS settings in `server/server.py`.
+- **Dependency Errors**: Ensure all dependencies are installed using `npm install` and `pip install -r requirements.txt`.
+
+---
+
+## Acknowledgments
+
+- [OpenWeather API](https://openweathermap.org/api) for weather data.
+- [Google Maps API](https://developers.google.com/maps) for map integration.
+- [React Chatbot Kit](https://fredrikoseberg.github.io/react-chatbot-kit-docs/) for the chatbot functionality.
