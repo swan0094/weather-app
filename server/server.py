@@ -4,6 +4,7 @@ import requests
 import os
 from cachetools import TTLCache
 from utils import serialize_daily_forecast, serialize_current_weather
+from chatbot import get_chatbot_response
 from dotenv import load_dotenv
 from geopy.geocoders import Nominatim
 
@@ -96,6 +97,12 @@ def get_coordinates():
             return jsonify({"error": "Location not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/api/chat", methods=["POST"])
+def chat():
+    user_input = request.json.get("message")
+    response = get_chatbot_response(user_input)  
+    return jsonify({"response": response})
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080)
